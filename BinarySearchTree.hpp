@@ -330,7 +330,7 @@ private:
   // NOTE:    This function must run in constant time.
   //          No iteration or recursion is allowed.
   static bool empty_impl(const Node *node) {
-    assert(false);
+    return !node;
   }
 
   // EFFECTS: Returns the size of the tree rooted at 'node', which is the
@@ -338,7 +338,11 @@ private:
   //          tree is 0.
   // NOTE:    This function must be tree recursive.
   static int size_impl(const Node *node) {
-    assert(false);
+    if (empty_impl(node)) { return 0; }
+    int size = 1;
+    if (node->left) { size += size_impl(node->left); } 
+    if (node->right) { size += size_impl(node->right); } 
+    return size;
   }
 
   // EFFECTS: Returns the height of the tree rooted at 'node', which is the
@@ -346,7 +350,12 @@ private:
   //          The height of an empty tree is 0.
   // NOTE:    This function must be tree recursive.
   static int height_impl(const Node *node) {
-    assert(false);
+    if (empty_impl(node)) { return 0; }
+    int height_left = 0;
+    int height_right = 0;
+    if (node->left) { height_left += height_impl(node->left); } 
+    if (node->right) { height_right += height_impl(node->right); } 
+    return (height_left > height_right ? height_left : height_right) + 1;  
   }
 
   // EFFECTS: Creates and returns a pointer to the root of a new node structure
@@ -354,13 +363,19 @@ private:
   //          tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static Node *copy_nodes_impl(Node *node) {
-    assert(false);
+    if (empty_impl(node)) { return nullptr; }
+    BinarySearchTree copy();
+    copy.root = Node(node->datum, copy_nodes_impl(node->left), copy_nodes_impl(node->right));
+    return copy.root();
   }
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static void destroy_nodes_impl(Node *node) {
-    assert(false);
+    if (empty_impl(node)) { return; }
+    delete node;
+    destroy_nodes_impl(node->left);
+    destroy_nodes_impl(node->right);
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
@@ -376,7 +391,11 @@ private:
   //       Two elements A and B are equivalent if and only if A is
   //       not less than B and B is not less than A.
   static Node * find_impl(Node *node, const T &query, Compare less) {
-    assert(false);
+    if (empty_impl(node)) { return nullptr; }
+    Compare comp;
+    if (comp(node->datum, query)) { return &node; }
+    find_impl(node->left);
+    find_impl(node->right);
   }
 
   // REQUIRES: item is not already contained in the tree rooted at 'node'
