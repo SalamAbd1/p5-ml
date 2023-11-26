@@ -373,9 +373,9 @@ private:
   // NOTE:    This function must be tree recursive.
   static void destroy_nodes_impl(Node *node) {
     if (empty_impl(node)) { return; }
-    delete node;
     destroy_nodes_impl(node->left);
     destroy_nodes_impl(node->right);
+    delete node;
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
@@ -392,8 +392,7 @@ private:
   //       not less than B and B is not less than A.
   static Node * find_impl(Node *node, const T &query, Compare less) {
     if (empty_impl(node)) { return nullptr; }
-    Compare comp;
-    if (comp(node->datum, query)) { return &node; }
+    if (!(less(node->datum, query) || less(query, node->datum))) { return &node; }
     find_impl(node->left);
     find_impl(node->right);
   }
@@ -414,7 +413,23 @@ private:
   //       template, NOT according to the < operator. Use the "less"
   //       parameter to compare elements.
   static Node * insert_impl(Node *node, const T &item, Compare less) {
-    assert(false);
+    if (empty_impl(node)) { return new Node(item, nullptr, nullptr); }
+    if (less(node->datum, item)) { 
+      if (!node->left) { 
+        node->left = insert_impl(node->left);
+      }
+      else {
+        insert_impl(node->left);
+      }
+    }
+    else {
+      if (!node->right) {
+        node->right = insert_impl(node->right);
+      }
+      else {
+        insert_impl(node->right);
+      }
+    }
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
@@ -425,7 +440,7 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the smallest element lives.
   static Node * min_element_impl(Node *node) {
-    assert(false);
+    !node->left ? return node : min_element_impl(node->left);
   }
 
   // EFFECTS : Returns a pointer to the Node containing the maximum element
@@ -434,7 +449,7 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the largest element lives.
   static Node * max_element_impl(Node *node) {
-    assert(false);
+    !node->right ? return node : max_element_impl(node->right);
   }
 
 
@@ -442,7 +457,9 @@ private:
   //          rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static bool check_sorting_invariant_impl(const Node *node, Compare less) {
-    assert(false);
+    if (empty_impl(node)) { return true; }
+    less(node->left->datum, node->datum) ? check_sorting_invariant_impl(node->left, less) : return false; // fix style
+    less(node->datum, node->right->datum) ? check_sorting_invariant_impl(node->right, less) : return false; // fix style
   }
 
   // EFFECTS : Traverses the tree rooted at 'node' using an in-order traversal,
@@ -453,7 +470,14 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#In-order
   //       for the definition of a in-order traversal.
   static void traverse_inorder_impl(const Node *node, std::ostream &os) {
-    assert(false);
+    if (!node->left && !node->right) { os << node << " "; return; }
+    if (node->left) { 
+      traverse_inorder_impl(node->left, os);
+    }
+    os << node << " ";
+    if (node->right) {
+      traverse_inorder_impl(node->right, os);
+    }
   }
 
   // EFFECTS : Traverses the tree rooted at 'node' using a pre-order traversal,
@@ -464,7 +488,14 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#Pre-order
   //       for the definition of a pre-order traversal.
   static void traverse_preorder_impl(const Node *node, std::ostream &os) {
-    assert(false);
+    if (!node->left && !node->right) { os << node << " "; return; }
+    os << node << " ";
+    if (node->left) { 
+      traverse_inorder_impl(node->left, os);
+    }
+    if (node->right) {
+      traverse_inorder_impl(node->right, os);
+    }
   }
 
   // EFFECTS : Returns a pointer to the Node containing the smallest element
@@ -479,7 +510,19 @@ private:
   //       'less' parameter). Based on the result, you gain some information
   //       about where the element you're looking for could be.
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
-    assert(false);
+    Node * ptr = nullptr;
+    if (empty_impl(node)) { return ptr;}
+    if (less(val, node->datum)) { // current node greater than val
+      if (node->left) {
+        ptr = min_greater_than_impl(node->left, val, less);
+      }
+    }
+    else { // current node less than or equal to val
+      if (node->right) {
+        ptr = min_greater_than_impl(node->right, val, less);
+      }
+    }
+    return ptr;
   }
 
 
