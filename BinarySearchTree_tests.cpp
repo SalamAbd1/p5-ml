@@ -177,7 +177,7 @@ TEST(test_empty_and_size_and_copy) {
    ASSERT_TRUE(tree.check_sorting_invariant());
 }
 
-TEST(test_find) {
+TEST(test_grand_tree) {
    BST tree;
    tree.insert(50); // 50
    tree.insert(60); // 50 R60
@@ -198,9 +198,6 @@ TEST(test_find) {
    ASSERT_EQUAL(*tree.min_element(), 30);
    ASSERT_EQUAL(*tree.max_element(), 70);
 
-   // testing check_sorting_invariant()
-   ASSERT_TRUE(tree.check_sorting_invariant());
-
    // testing traverse_inorder() & traverse_preorder()
    ostringstream oss;
    tree.traverse_inorder(oss);
@@ -208,6 +205,16 @@ TEST(test_find) {
    oss.str("");
    tree.traverse_preorder(oss);
    ASSERT_EQUAL(oss.str(), "50 40 30 35 60 70 65 ");
+
+   // testing min_greater_than()
+   ASSERT_EQUAL(*tree.min_greater_than(25), 30); // lowest val
+   ASSERT_EQUAL(*tree.min_greater_than(66), 70); // highest val
+   ASSERT_EQUAL(*tree.min_greater_than(40), 50); // middle val
+   ASSERT_EQUAL(tree.min_greater_than(70), tree.end()); // none val
+   ASSERT_EQUAL(*tree.min_greater_than(35), 40); // same val
+
+   // testing check_sorting_invariant()
+   ASSERT_TRUE(tree.check_sorting_invariant());
 }
 
 TEST_MAIN()

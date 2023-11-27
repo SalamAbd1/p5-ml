@@ -457,11 +457,13 @@ private:
     return !node->right ? node : max_element_impl(node->right);
   }
 
-
   // EFFECTS: Returns whether the sorting invariant holds on the tree
   //          rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static bool check_sorting_invariant_impl(const Node *node, Compare less) {
+    if (find_impl(node->left, node->datum, less) || find_impl(node->right, node->datum, less)) {
+      return false;
+    }
     if (node->left) {
       return less(node->left->datum, node->datum) ? 
       check_sorting_invariant_impl(node->left, less) : false; 
@@ -502,10 +504,10 @@ private:
     if (!node->left && !node->right) { os << node->datum << " "; return; }
     os << node->datum << " ";
     if (node->left) { 
-      traverse_inorder_impl(node->left, os);
+      traverse_preorder_impl(node->left, os);
     }
     if (node->right) {
-      traverse_inorder_impl(node->right, os);
+      traverse_preorder_impl(node->right, os);
     }
   }
 
