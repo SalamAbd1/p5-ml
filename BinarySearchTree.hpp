@@ -467,13 +467,26 @@ private:
     if (find_impl(node->left, node->datum, less) || find_impl(node->right, node->datum, less)) {
       return false;
     }
+    bool not_failed = true;
     if (node->left) {
-      return less(node->left->datum, node->datum) ? 
-      check_sorting_invariant_impl(node->left, less) : false; 
+      if (less(node->left->datum, node->datum)) { 
+        not_failed = check_sorting_invariant_impl(node->left, less);
+      }
+      else {
+        return false; 
+      } 
+    }
+    if (!not_failed) {
+      return false;
     }
     if (node->right) {
-      return less(node->datum, node->right->datum) ? 
-      check_sorting_invariant_impl(node->right, less) : false;
+      if (less(node->datum, node->right->datum)) { 
+       not_failed = check_sorting_invariant_impl(node->right, less);
+       return not_failed;
+      }
+      else {
+        return false;
+      }
     }
     return true;
   }

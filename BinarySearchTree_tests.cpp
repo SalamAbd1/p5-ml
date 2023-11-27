@@ -155,6 +155,8 @@ TEST(test_empty_and_size_and_copy) {
    BST tree;
    ASSERT_TRUE(tree.empty());
    ASSERT_EQUAL(tree.size(), 0);
+   ASSERT_EQUAL(tree.height(), 0);
+   
    tree.insert(10); ASSERT_EQUAL(tree.size(), 1); // 10
    ASSERT_FALSE(tree.empty());
    tree.insert(8); ASSERT_EQUAL(tree.size(), 2); // 10 L8
@@ -162,6 +164,9 @@ TEST(test_empty_and_size_and_copy) {
    tree.insert(11); ASSERT_EQUAL(tree.size(), 4); // 10 L8 R(12 L11)
    tree.insert(9); ASSERT_EQUAL(tree.size(), 5); // 10 L(8 R9) R(12 L11)
    ASSERT_FALSE(tree.empty());
+   
+   ASSERT_EQUAL(tree.size(), 5);
+   ASSERT_EQUAL(tree.height(), 3);
 
    BST copy(tree);
    ASSERT_EQUAL(tree.size(), copy.size());
@@ -188,6 +193,10 @@ TEST(test_grand_tree) {
    tree.insert(35); // 50 L(40 L(30 R35)) R(60 R(70 L65))
    Iterator root_iter(tree.find(50));
 
+   // testing size() and height()
+   ASSERT_EQUAL(tree.size(), 7);
+   ASSERT_EQUAL(tree.height(), 4);
+
    // testing find()
    ASSERT_EQUAL(*tree.find(50), 50); // root
    ASSERT_EQUAL(*tree.find(30), 30); // middle
@@ -213,8 +222,29 @@ TEST(test_grand_tree) {
    ASSERT_EQUAL(tree.min_greater_than(70), tree.end()); // none val
    ASSERT_EQUAL(*tree.min_greater_than(35), 40); // same val
 
+   
    // testing check_sorting_invariant()
    ASSERT_TRUE(tree.check_sorting_invariant());
+   
+   /*
+   // change root node, now tree has duplicates
+   *tree.begin() = 30;
+
+   // sorting invariant broken
+   ASSERT_FALSE(tree.check_sorting_invariant());
+
+   // change root node back
+   *tree.begin() = 50;
+
+   // sorting invariant fixed
+   ASSERT_TRUE(tree.check_sorting_invariant());
+
+   // change right node to become less than root
+   *(++tree.begin()) = 45;
+
+   // sorting invariant broken 
+   ASSERT_FALSE(tree.check_sorting_invariant());
+   */
 }
 
 TEST(bst_public_test) {
@@ -269,6 +299,11 @@ TEST(test_empty_tree) {
    ASSERT_TRUE(tree.empty());
    BST copy(tree);
    ASSERT_TRUE(copy.empty());
+   ASSERT_EQUAL(tree.size(), 0);
+   ASSERT_EQUAL(tree.height(), 0);
+   ASSERT_EQUAL(copy.size(), 0);
+   ASSERT_EQUAL(copy.height(), 0);
+
 }
 
 TEST(test_tree_one_element) {
@@ -287,14 +322,20 @@ TEST(test_tree_one_element) {
    ASSERT_EQUAL(oss.str(), "0 "); 
    ASSERT_TRUE(tree.check_sorting_invariant());
    ASSERT_FALSE(tree.empty());
+   ASSERT_EQUAL(tree.size(), 1);
    BST copy(tree);
    ASSERT_FALSE(copy.empty());
+   ASSERT_EQUAL(copy.size(), 1);
+   ASSERT_EQUAL(tree.height(), 1);
+   ASSERT_EQUAL(copy.height(), 1);
 }
 
 TEST(test_tree_two_elements) {
    BST tree;
    tree.insert(1); // 1
    tree.insert(0); // 1 L0
+   ASSERT_EQUAL(tree.size(), 2);
+   ASSERT_EQUAL(tree.height(), 2);
    ASSERT_EQUAL(*tree.find(0), 0); 
    ASSERT_EQUAL(*tree.find(1), 1); 
    ASSERT_EQUAL(*tree.min_element(), 0);
@@ -311,6 +352,8 @@ TEST(test_tree_two_elements) {
    ASSERT_FALSE(tree.empty());
    BST copy(tree);
    ASSERT_FALSE(copy.empty());
+   ASSERT_EQUAL(tree.height(), 2);
+   ASSERT_EQUAL(copy.height(), 2);
 }
 
 using BSTring = BinarySearchTree<string>;
@@ -319,7 +362,7 @@ using Striterator = BinarySearchTree<string>::Iterator;
 TEST(test_tree_strings) {
    BSTring tree;
 
-   // testing empty() and size()
+   // testing empty(), size(), height()
    ASSERT_TRUE(tree.empty());
    ASSERT_EQUAL(tree.size(), 0);
 
@@ -328,6 +371,7 @@ TEST(test_tree_strings) {
 
    ASSERT_FALSE(tree.empty());
    ASSERT_EQUAL(tree.size(), 2);
+   ASSERT_EQUAL(tree.height(), 2);
 
    // testing find()
    ASSERT_EQUAL(*tree.find("sussy"), "sussy");
@@ -361,6 +405,62 @@ TEST(test_tree_strings) {
    ASSERT_EQUAL(tree.find("not here!"), tree.end());
    ASSERT_EQUAL(*tree.min_element(), "amogus");
    ASSERT_EQUAL(*tree.max_element(), "sussy");
+}
+
+TEST(test_height_longest_path) {
+   BST tree;
+   tree.insert(50); // 50
+   tree.insert(60); // 50 R60
+   tree.insert(70); // 50 R(60 R70)
+   tree.insert(40); // 50 L40 R(60 R70);
+   tree.insert(30); // 50 L(40 L30) R(60 R70)
+   tree.insert(65); // 50 L(40 L30) R(60 R(70 L65))
+   tree.insert(35); // 50 L(40 L(30 R35)) R(60 R(70 L65))
+   tree.insert(61); // 50 L(40 L(30 R35)) R(60 R(70 L(65 L61)))
+   tree.insert(62); // 50 L(40 L(30 R35)) R(60 R(70 L(65 L(61 R62))))
+
+   ASSERT_EQUAL(tree.size(), 9);
+   ASSERT_EQUAL(tree.height(), 6);
+}
+
+TEST(test_check_sorting_invariant) {
+   BST tree;
+   tree.insert(20); // 20
+   tree.insert(10); // 20 L10
+   tree.insert(25); // 20 L10 R25
+   tree.insert(5); // 20 L(10 L5) R25
+   tree.insert(0); // 20 L(10 L(5 L0)) R25
+
+   ASSERT_TRUE(tree.check_sorting_invariant());
+
+   // change min value 0 to 5 to make duplicates
+   Iterator iter(tree.begin());
+   *iter = 5;
+   ASSERT_FALSE(tree.check_sorting_invariant());
+
+   // change back
+   *iter = 0;
+   ASSERT_TRUE(tree.check_sorting_invariant());
+
+   // change min value 0 to 30 to break invariant
+   // problem will be: larger value 30 to the left of smaller value 5
+   *iter = 30;
+   ASSERT_FALSE(tree.check_sorting_invariant());
+
+   // mess with tree
+   *iter = 0; // 20 L(10 L(5 L0)) R25
+   ASSERT_TRUE(tree.check_sorting_invariant());
+   tree.insert(30); // 20 L(10 L(5 L0)) R25 R30
+   ++iter; // pointing to 5
+   ++iter; // pointing to 10
+   ++iter; // pointing to 20
+   ++iter; // pointing to 25
+   ++iter; // pointing to 30
+
+   // change 30 to 15 to break invariant
+   // problem will be: smaller value 15 to the right of larger value 25
+   *iter = 15; // 20 L(10 L(5 L0)) R25 R15
+   ASSERT_FALSE(tree.check_sorting_invariant());
 }
 
 TEST_MAIN()
