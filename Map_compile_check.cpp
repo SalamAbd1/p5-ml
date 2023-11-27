@@ -110,7 +110,7 @@ int main() {
 
   Map<string, int>::Iterator it_copy(const_it);
   Map<Duck, string, DuckWealthLess>::Iterator duck_it_copy(const_duck_it);
-
+  
   cout << (*it_copy).first << (*duck_it_copy).second << endl;
 
   cout << b << st << endl;
