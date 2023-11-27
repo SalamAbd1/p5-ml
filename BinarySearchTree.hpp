@@ -445,6 +445,7 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the smallest element lives.
   static Node * min_element_impl(Node *node) {
+    if (empty_impl(node)) {return nullptr;}
     return !node->left ? node : min_element_impl(node->left);
   }
 
@@ -454,6 +455,7 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the largest element lives.
   static Node * max_element_impl(Node *node) {
+    if (empty_impl(node)) {return nullptr;}
     return !node->right ? node : max_element_impl(node->right);
   }
 
@@ -461,6 +463,7 @@ private:
   //          rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static bool check_sorting_invariant_impl(const Node *node, Compare less) {
+    if (empty_impl(node)) { return true; }
     if (find_impl(node->left, node->datum, less) || find_impl(node->right, node->datum, less)) {
       return false;
     }
@@ -483,6 +486,7 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#In-order
   //       for the definition of a in-order traversal.
   static void traverse_inorder_impl(const Node *node, std::ostream &os) {
+    if (empty_impl(node)) { return; }
     if (!node->left && !node->right) { os << node->datum << " "; return; }
     if (node->left) { 
       traverse_inorder_impl(node->left, os);
@@ -501,6 +505,7 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#Pre-order
   //       for the definition of a pre-order traversal.
   static void traverse_preorder_impl(const Node *node, std::ostream &os) {
+    if (empty_impl(node)) { return; }
     if (!node->left && !node->right) { os << node->datum << " "; return; }
     os << node->datum << " ";
     if (node->left) { 
