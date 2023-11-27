@@ -462,14 +462,14 @@ private:
   // EFFECTS: Returns whether the sorting invariant holds on the tree
   //          rooted at 'node'.
   // NOTE:    This function must be tree recursive.
-  static bool check_sorting_invariant_impl(const Node *node, Compare less) {
+  static bool check_sorting_invariant_impl(const Node *node, Compare less) { 
     if (empty_impl(node)) { return true; }
     if (find_impl(node->left, node->datum, less) || find_impl(node->right, node->datum, less)) {
       return false;
     }
     bool not_failed = true;
     if (node->left) {
-      if (less(node->left->datum, node->datum)) { 
+      if (less(max_element_impl(node->left)->datum, node->datum)) { 
         not_failed = check_sorting_invariant_impl(node->left, less);
       }
       else {
@@ -480,7 +480,7 @@ private:
       return false;
     }
     if (node->right) {
-      if (less(node->datum, node->right->datum)) { 
+      if (less(node->datum, min_element_impl(node->right)->datum)) { 
        not_failed = check_sorting_invariant_impl(node->right, less);
        return not_failed;
       }

@@ -225,26 +225,6 @@ TEST(test_grand_tree) {
    
    // testing check_sorting_invariant()
    ASSERT_TRUE(tree.check_sorting_invariant());
-   
-   /*
-   // change root node, now tree has duplicates
-   *tree.begin() = 30;
-
-   // sorting invariant broken
-   ASSERT_FALSE(tree.check_sorting_invariant());
-
-   // change root node back
-   *tree.begin() = 50;
-
-   // sorting invariant fixed
-   ASSERT_TRUE(tree.check_sorting_invariant());
-
-   // change right node to become less than root
-   *(++tree.begin()) = 45;
-
-   // sorting invariant broken 
-   ASSERT_FALSE(tree.check_sorting_invariant());
-   */
 }
 
 TEST(bst_public_test) {
@@ -461,6 +441,36 @@ TEST(test_check_sorting_invariant) {
    // problem will be: smaller value 15 to the right of larger value 25
    *iter = 15; // 20 L(10 L(5 L0)) R25 R15
    ASSERT_FALSE(tree.check_sorting_invariant());
+
+   // change back
+   *iter = 30;
+   ASSERT_TRUE(tree.check_sorting_invariant());
+
+   // mess with tree
+   tree.insert(6); // 20 L(10 L(5 L0 R6)) R25 R30
+   Iterator new_iter(tree.begin()); // pointing to 0
+   ++new_iter; // pointing to 5
+   ++new_iter; // pointing to 6
+   
+   // change 6 to 35 to break invariant
+   // problem: 35 is on left-hand side of tree, but larger than root node
+   // (inserting 35 normally would not )
+   *new_iter = 35;
+   ASSERT_FALSE(tree.check_sorting_invariant());
 }
 
+TEST(test_check_sorting_invariant_2) {
+   BST tree;
+   tree.insert(5); // 5
+   tree.insert(1); // 5 L1
+   tree.insert(10); // 5 L1 R10
+   tree.insert(0); // 5 L(1 L0) R10
+   tree.insert(4); // 5 L(1 L0 R4)) R10
+   ASSERT_TRUE(tree.check_sorting_invariant());
+   Iterator iter(tree.begin());
+   ++iter; // pointing to 1
+   ++iter; // pointing to 4
+   *iter = 7; // 5 L(1 L0 R7)) R10
+   ASSERT_FALSE(tree.check_sorting_invariant());
+}
 TEST_MAIN()
