@@ -218,7 +218,7 @@ TEST(test_grand_tree) {
 }
 
 TEST(bst_public_test) {
-  BinarySearchTree<int> tree;
+  BST tree;
 
   tree.insert(5);
 
@@ -271,9 +271,9 @@ TEST(test_empty_tree) {
    ASSERT_TRUE(copy.empty());
 }
 
-TEST(test_one_element_tree) {
+TEST(test_tree_one_element) {
    BST tree;
-   tree.insert(0);
+   tree.insert(0); // 0
    ASSERT_EQUAL(*tree.find(0), 0); 
    ASSERT_EQUAL(*tree.min_element(), 0);
    ASSERT_EQUAL(*tree.max_element(), 0);
@@ -289,7 +289,78 @@ TEST(test_one_element_tree) {
    ASSERT_FALSE(tree.empty());
    BST copy(tree);
    ASSERT_FALSE(copy.empty());
+}
 
+TEST(test_tree_two_elements) {
+   BST tree;
+   tree.insert(1); // 1
+   tree.insert(0); // 1 L0
+   ASSERT_EQUAL(*tree.find(0), 0); 
+   ASSERT_EQUAL(*tree.find(1), 1); 
+   ASSERT_EQUAL(*tree.min_element(), 0);
+   ASSERT_EQUAL(*tree.max_element(), 1);
+   ASSERT_EQUAL(*tree.min_greater_than(-1), 0);
+   ASSERT_EQUAL(*tree.min_greater_than(0), 1);
+   ostringstream oss;
+   tree.traverse_inorder(oss);
+   ASSERT_EQUAL(oss.str(), "0 1 ");
+   oss.str("");
+   tree.traverse_preorder(oss);
+   ASSERT_EQUAL(oss.str(), "1 0 "); 
+   ASSERT_TRUE(tree.check_sorting_invariant());
+   ASSERT_FALSE(tree.empty());
+   BST copy(tree);
+   ASSERT_FALSE(copy.empty());
+}
+
+using BSTring = BinarySearchTree<string>;
+using Striterator = BinarySearchTree<string>::Iterator;
+
+TEST(test_tree_strings) {
+   BSTring tree;
+
+   // testing empty() and size()
+   ASSERT_TRUE(tree.empty());
+   ASSERT_EQUAL(tree.size(), 0);
+
+   tree.insert("sussy"); // sussy
+   tree.insert("amogus"); // sussy L amogus
+
+   ASSERT_FALSE(tree.empty());
+   ASSERT_EQUAL(tree.size(), 2);
+
+   // testing find()
+   ASSERT_EQUAL(*tree.find("sussy"), "sussy");
+   ASSERT_EQUAL(tree.find("not here!"), tree.end());
+
+   // testing min_element() and max_element()
+   ASSERT_EQUAL(*tree.min_element(), "amogus");
+   ASSERT_EQUAL(*tree.max_element(), "sussy");
+
+   // testing min_greater_than()
+   ASSERT_EQUAL(*tree.min_greater_than("a"), "amogus");
+   ASSERT_EQUAL(*tree.min_greater_than("b"), "sussy");
+   ASSERT_EQUAL(tree.min_greater_than("z"), tree.end());
+
+   // testing traverse_inorder() & traverse_preorder()
+   ostringstream oss;
+   tree.traverse_inorder(oss);
+   ASSERT_EQUAL(oss.str(), "amogus sussy ");
+   oss.str("");
+   tree.traverse_preorder(oss);
+   ASSERT_EQUAL(oss.str(), "sussy amogus "); 
+
+   // testing check_sorting_invariant()
+   ASSERT_TRUE(tree.check_sorting_invariant());
+
+   // testing copy constructor
+   BSTring copy(tree);
+   ASSERT_FALSE(tree.empty());
+   ASSERT_EQUAL(tree.size(), 2);
+   ASSERT_EQUAL(*tree.find("sussy"), "sussy");
+   ASSERT_EQUAL(tree.find("not here!"), tree.end());
+   ASSERT_EQUAL(*tree.min_element(), "amogus");
+   ASSERT_EQUAL(*tree.max_element(), "sussy");
 }
 
 TEST_MAIN()
