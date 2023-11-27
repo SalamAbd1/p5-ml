@@ -148,5 +148,66 @@ TEST(test_compile_check) {
 
 }
 
+using BST = BinarySearchTree<int>; // making my life easier...
+using Iterator = BinarySearchTree<int>::Iterator; // continuing to make my life easier...
+
+TEST(test_empty_and_size_and_copy) {
+   BST tree;
+   ASSERT_TRUE(tree.empty());
+   ASSERT_EQUAL(tree.size(), 0);
+   tree.insert(10); ASSERT_EQUAL(tree.size(), 1); // 10
+   ASSERT_FALSE(tree.empty());
+   tree.insert(8); ASSERT_EQUAL(tree.size(), 2); // 10 L8
+   tree.insert(12); ASSERT_EQUAL(tree.size(), 3); // 10 L8 R12
+   tree.insert(11); ASSERT_EQUAL(tree.size(), 4); // 10 L8 R(12 L11)
+   tree.insert(9); ASSERT_EQUAL(tree.size(), 5); // 10 L(8 R9) R(12 L11)
+   ASSERT_FALSE(tree.empty());
+
+   BST copy(tree);
+   ASSERT_EQUAL(tree.size(), copy.size());
+   ostringstream oss;
+   ostringstream oss_copy;
+   tree.traverse_inorder(oss);
+   copy.traverse_inorder(oss_copy);
+   ASSERT_EQUAL(oss.str(), oss_copy.str());
+
+   ASSERT_EQUAL(*tree.min_element(), 8);
+   ASSERT_EQUAL(*tree.max_element(), 12);
+   
+   ASSERT_TRUE(tree.check_sorting_invariant());
+}
+
+TEST(test_find) {
+   BST tree;
+   tree.insert(50); // 50
+   tree.insert(60); // 50 R60
+   tree.insert(70); // 50 R(60 R70)
+   tree.insert(40); // 50 L40 R(60 R70);
+   tree.insert(30); // 50 L(40 L30) R(60 R70)
+   tree.insert(65); // 50 L(40 L30) R(60 R(70 L65))
+   tree.insert(35); // 50 L(40 L(30 R35)) R(60 R(70 L65))
+   Iterator root_iter(tree.find(50));
+
+   // testing find()
+   ASSERT_EQUAL(*tree.find(50), 50); // root
+   ASSERT_EQUAL(*tree.find(30), 30); // middle
+   ASSERT_EQUAL(*tree.find(65), 65); // leaf
+   ASSERT_EQUAL(tree.find(75), tree.end()); // none
+
+   // testing min_element() & max_element()
+   ASSERT_EQUAL(*tree.min_element(), 30);
+   ASSERT_EQUAL(*tree.max_element(), 70);
+
+   // testing check_sorting_invariant()
+   ASSERT_TRUE(tree.check_sorting_invariant());
+
+   // testing traverse_inorder() & traverse_preorder()
+   ostringstream oss;
+   tree.traverse_inorder(oss);
+   ASSERT_EQUAL(oss.str(), "30 35 40 50 60 65 70 ");
+   oss.str("");
+   tree.traverse_preorder(oss);
+   ASSERT_EQUAL(oss.str(), "50 40 30 35 60 70 65 ");
+}
 
 TEST_MAIN()
