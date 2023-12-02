@@ -364,7 +364,8 @@ private:
   // NOTE:    This function must be tree recursive.
   static Node *copy_nodes_impl(Node *node) {
     if (empty_impl(node)) { return nullptr; }
-    Node * ptr = new Node(node->datum, copy_nodes_impl(node->left), copy_nodes_impl(node->right));
+    Node * ptr = 
+      new Node(node->datum, copy_nodes_impl(node->left), copy_nodes_impl(node->right));
     return ptr;
   }
 
@@ -464,7 +465,8 @@ private:
   // NOTE:    This function must be tree recursive.
   static bool check_sorting_invariant_impl(const Node *node, Compare less) { 
     if (empty_impl(node)) { return true; }
-    if (find_impl(node->left, node->datum, less) || find_impl(node->right, node->datum, less)) {
+    if (find_impl(node->left, node->datum, less) || 
+        find_impl(node->right, node->datum, less)) {
       return false;
     }
     bool not_failed = true;

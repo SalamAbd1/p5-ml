@@ -1,2 +1,0 @@
-train_small.csv
-test_small.csv
