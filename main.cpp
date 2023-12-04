@@ -130,35 +130,43 @@ private:
     map<pair<string, string>, int> labels_words; // num posts with label C and word W
 };
 
-
-int main(int argc, char* argv[]) {
-    cout.precision(3); 
+bool catchErrors(int argc, char* argv[]) {
     string debug = "--debug";
     if ((argc != 4 && argc != 3) || (argc == 4 && argv[3] != debug)) { 
         cout << "Usage: main.exe TRAIN_FILE TEST_FILE [--debug]" << endl;
-        return 1; 
+        return true; 
     }
 
     try { csvstream trainStream(argv[1]); }
 
     catch (csvstream_exception &failToOpen) {
         cout << "Error opening file: " << argv[1] << endl;
-        return 1;
+        return true;
     }
 
-    try { csvstream testStream(argv[2]); }
-
+    try { csvstream testStream(argv[2]); } 
+    
     catch (csvstream_exception &failToOpen) {
         cout << "Error opening file: " << argv[2] << endl;
+        return true;
     }
 
+    return false; 
+}
+
+
+int main(int argc, char* argv[]) {
+    cout.precision(3); 
+
+    // check for errors with arguments or file opening
+    if (catchErrors(argc, argv)) return 1;
+
+    // check if --debug was entered as an argument 
+    // will be true if 4 arguments given and no errors
     bool debugged = argc == 4;
 
-    if (debugged) cout << "training data:" << endl;
-
-    // streams
-    csvstream trainStream(argv[1]);
-    csvstream testStream(argv[2]);
+    // train and test streams
+    csvstream trainStream(argv[1]), testStream(argv[2]);
 
     // classifier and data
     Classifier Genius(trainStream, debugged);
@@ -166,6 +174,7 @@ int main(int argc, char* argv[]) {
     int numCorrect = 0;
     
     // output
+    if (debugged) cout << "training data:" << endl;
     cout << "trained on " << Genius.getNumPosts() << " examples" << endl;
     if (debugged) { 
         cout << "vocabulary size = " << Genius.getVocabSize() << endl << endl;
