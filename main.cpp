@@ -167,6 +167,7 @@ int main(int argc, char* argv[]) {
 
     // train and test streams
     csvstream trainStream(argv[1]), testStream(argv[2]);
+    if (debugged) cout << "training data:" << endl;
 
     // classifier and data
     Classifier Genius(trainStream, debugged);
@@ -174,7 +175,6 @@ int main(int argc, char* argv[]) {
     int numCorrect = 0;
     
     // output
-    if (debugged) cout << "training data:" << endl;
     cout << "trained on " << Genius.getNumPosts() << " examples" << endl;
     if (debugged) { 
         cout << "vocabulary size = " << Genius.getVocabSize() << endl << endl;
